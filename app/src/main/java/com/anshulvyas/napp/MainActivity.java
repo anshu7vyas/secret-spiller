@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.anshulvyas.napp.utils.SystemPropertiesProxy;
+
 public class MainActivity extends AppCompatActivity {
     private Button mButtonContacts;
     private Button mButtonGPS;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     public String getIMEI(Context context){
         TelephonyManager mngr = (TelephonyManager) context.getSystemService(context.TELEPHONY_SERVICE);
         String imei = mngr.getDeviceId();
+        //String imei = SystemPropertiesProxy.get(this, "ro.gsm.imei");
         return imei;
     }
 }
