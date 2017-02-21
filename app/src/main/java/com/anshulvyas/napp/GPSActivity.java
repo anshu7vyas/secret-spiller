@@ -15,10 +15,11 @@ public class GPSActivity extends AppCompatActivity {
 
     private TextView textView;
     private static final String TAG = "testGPS";
-    private LocationManager mLocationManager = null;
+    /*private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1800;
-    private static final float LOCATION_DISTANCE = 3;
+    private static final float LOCATION_DISTANCE = 3;*/
 
+/*
     private class LocationListener implements android.location.LocationListener
     {
         Location mLastLocation;
@@ -63,6 +64,7 @@ public class GPSActivity extends AppCompatActivity {
             new LocationListener(LocationManager.GPS_PROVIDER),
             new LocationListener(LocationManager.NETWORK_PROVIDER)
     };
+*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +72,7 @@ public class GPSActivity extends AppCompatActivity {
         setContentView(R.layout.activity_gps);
 
         Log.e(TAG, "onCreate");
-        initializeLocationManager();
+        /*initializeLocationManager();
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
@@ -88,15 +90,15 @@ public class GPSActivity extends AppCompatActivity {
             Log.e(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
             Log.d(TAG, "gps provider does not exist " + ex.getMessage());
-        }
+        }*/
 
-        /*Intent intent = getIntent();
+        Intent intent = getIntent();
         String gpsCoordinates = intent.getExtras().getString("GPSCoordinates");
         textView = (TextView) findViewById(R.id.tv_gps);
-        textView.setText(gpsCoordinates);*/
+        textView.setText(gpsCoordinates);
     }
 
-    @Override
+    /*@Override
     public void onDestroy()
     {
         Log.e(TAG, "onDestroy");
@@ -117,7 +119,7 @@ public class GPSActivity extends AppCompatActivity {
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
-    }
+    }*/
 
 }
 
