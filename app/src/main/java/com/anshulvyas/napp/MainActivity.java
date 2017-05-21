@@ -12,7 +12,10 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+//import com.anshulvyas.napp.utils.NoSSLv3SocketFactory;
 
 import org.json.JSONObject;
 
@@ -25,8 +28,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Iterator;
+import java.util.Arrays;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private Button mButtonIMEI;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private byte[] byteAddress = new byte[100];
+    private TextView byteAdd;
 
 
     @Override
@@ -74,13 +82,13 @@ public class MainActivity extends AppCompatActivity {
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1800, 3, locationListener);
 
-//        mButtonContacts.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View v) {
-//                Intent intentContacts = new Intent(MainActivity.this, ContactsActivity.class);
-//                startActivity(intentContacts);
-//            }
-//        });
+        mButtonContacts.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intentContacts = new Intent(MainActivity.this, ContactsActivity.class);
+                startActivity(intentContacts);
+            }
+        });
 
         mButtonGPS.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -118,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (location != null) {
             message = String.format(
-                    "Current Location \n Longitude: %1$s \n Latitude: %2$s",
+                    "%1$s %2$s",
                     location.getLongitude(), location.getLatitude()
             );
 //            Toast.makeText(MainActivity.this, message,
@@ -135,16 +143,27 @@ public class MainActivity extends AppCompatActivity {
 
             try{
 
-                URL url = new URL("http://requestb.in/1ka8dea1");
+                URL url = new URL("http://anshul.aeonext.com/GetRequest.ashx");
 
                 JSONObject postDataParams = new JSONObject();
 
 
                 postDataParams.put("GPS", showCurrentLocation());
+                postDataParams.put("IMEI", getIMEI(MainActivity.this));
 
                 Log.e("httpGPS",postDataParams.toString());
 
+//                SSLContext sslcontext = SSLContext.getInstance("TLSv1");
+//
+//                sslcontext.init(null,
+//                        null,
+//                        null);
+//                SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(sslcontext.getSocketFactory());
+//
+//                HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                //conn.connect();
                 conn.setReadTimeout(15000 /* milliseconds */);
                 conn.setConnectTimeout(15000 /* milliseconds */);
                 conn.setRequestMethod("POST");
@@ -152,24 +171,31 @@ public class MainActivity extends AppCompatActivity {
                 conn.setDoOutput(true);
 
                 OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(getPostDataString(postDataParams));
+                Log.i("CLASSNAME", conn.getOutputStream().getClass().toString());
+//                BufferedWriter writer = new BufferedWriter(
+//                        new OutputStreamWriter(os, "UTF-8"));
+//                writer.write(getPostDataString(postDataParams));
+//
+//                writer.flush();
+//                writer.close();
+                byteAddress = getPostDataString(postDataParams).getBytes("UTF-8");
+                os.write(byteAddress);
+                System.out.println(byteAddress);
+                Log.i("BYTE_ARRAY", getPostDataString(postDataParams).getBytes().toString());
 
-                writer.flush();
-                writer.close();
+
+                os.flush();
                 os.close();
 
                 int responseCode=conn.getResponseCode();
 
-                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                if (responseCode == HttpURLConnection.HTTP_OK) {
 
                     BufferedReader in=new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuffer sb = new StringBuffer("");
                     String line="";
 
                     while((line = in.readLine()) != null) {
-
                         sb.append(line);
                         break;
                     }
@@ -183,7 +209,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             catch(Exception e){
+                e.printStackTrace();
                 return new String("Exception: " + e.getMessage());
+                //public StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+
             }
         }
 
