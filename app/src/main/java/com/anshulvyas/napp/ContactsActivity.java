@@ -1,19 +1,23 @@
 package com.anshulvyas.napp;
 
-import android.database.Cursor;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
 import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 
 public class ContactsActivity extends AppCompatActivity {
     public TextView outputText;
+    private Intent mContactsIntent;
+    public static String KEY_INTENT_DATA = "CONTACTS_DATA";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -23,8 +27,16 @@ public class ContactsActivity extends AppCompatActivity {
         fetchContacts();
     }
 
-    public void fetchContacts() {
+    public void openMainActivity(StringBuffer contacts) {
+        mContactsIntent = new Intent(ContactsActivity.this, MainActivity.class);
+        // TODO: send StringBuffer using Bundle
+        Log.i("~!@#$", contacts.toString());
+        mContactsIntent.putExtra(KEY_INTENT_DATA, contacts.toString());
+        startActivity(mContactsIntent);
+        this.finish();
+    }
 
+    public void fetchContacts() {
         ContentResolver cr = getApplicationContext().getContentResolver(); //Activity/Application android.content.Context
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
         if(cursor.moveToFirst())
@@ -112,10 +124,12 @@ public class ContactsActivity extends AppCompatActivity {
                 }
 
                 output.append("\n");
+                //fire an intent to send data
+                //callback
             }
 
             outputText.setText(output);
+            openMainActivity(output);
         }
     }
-
 }
