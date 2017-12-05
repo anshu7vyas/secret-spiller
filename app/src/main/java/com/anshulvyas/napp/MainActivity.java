@@ -18,8 +18,10 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private Button mButtonIMEI;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private byte[] byteAddress = new byte[100];
+    private byte[] gpsBytes = new byte[100];
     private byte[] imeiBytes = new byte[15];
     private byte[] contactsBytes = new byte[1000];
     private TextView byteAdd;
@@ -121,12 +123,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    // To request IMEI
+
     public String getIMEI(Context context){
         TelephonyManager mngr = (TelephonyManager) context.getSystemService(context.TELEPHONY_SERVICE);
         String imei = mngr.getDeviceId();
         //String imei = SystemPropertiesProxy.get(this, "ro.gsm.imei");
         return imei;
     }
+
+    // To request Geolocation
 
     public String showCurrentLocation() {
         String message = "";
@@ -137,8 +144,6 @@ public class MainActivity extends AppCompatActivity {
                     "%1$s %2$s",
                     location.getLongitude(), location.getLatitude()
             );
-//            Toast.makeText(MainActivity.this, message,
-//                    Toast.LENGTH_LONG).show();
         }
         return message;
     }
@@ -161,18 +166,20 @@ public class MainActivity extends AppCompatActivity {
                 String data = args[0];
                 Log.i(TAG, "doInBackground: " + data);
                 URL url = new URL("http://anshul.aeonext.com/GetRequest.ashx");
-                JSONObject postDataParams = new JSONObject();
+                JSONObject gpsPostDataParams = new JSONObject();
                 //
-                JSONObject newPostDataParams = new JSONObject();
+                JSONObject imeiPostDataParams = new JSONObject();
                 JSONObject contactsPostDataParams = new JSONObject();
                 //
-                postDataParams.put("GPS", showCurrentLocation());
-                //
-                newPostDataParams.put("IMEI", getIMEI(MainActivity.this));
-                //
                 contactsPostDataParams.put("contacts", data);
+
+                gpsPostDataParams.put("GPS", showCurrentLocation());
                 //
-                Log.e("httpGPS",postDataParams.toString());
+                imeiPostDataParams.put("IMEI", getIMEI(MainActivity.this));
+                //
+                //contactsPostDataParams.put("contacts", data);
+                //
+                Log.e("httpGPS", gpsPostDataParams.toString());
 
 //                SSLContext sslcontext = SSLContext.getInstance("TLSv1");
 //
@@ -192,34 +199,36 @@ public class MainActivity extends AppCompatActivity {
                 conn.setDoOutput(true);
 
                 OutputStream os = conn.getOutputStream();
-                Log.i("CLASSNAME", conn.getOutputStream().getClass().toString());
-//                BufferedWriter writer = new BufferedWriter(
-//                        new OutputStreamWriter(os, "UTF-8"));
-//                writer.write(getPostDataString(postDataParams));
+                //Log.i("CLASSNAME", conn.getOutputStream().getClass().toString());
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(gpsPostDataParams));
+                writer.write(getPostDataString(imeiPostDataParams));
+                writer.write(getPostDataString(contactsPostDataParams));
+
+                writer.flush();
+                writer.close();
+//                gpsBytes = getPostDataString(gpsPostDataParams).getBytes("UTF-8");
 //
-//                writer.flush();
-//                writer.close();
-                byteAddress = getPostDataString(postDataParams).getBytes("UTF-8");
-
-                imeiBytes = getPostDataString(newPostDataParams).getBytes("UTF-8");
-
-                os.write(byteAddress);
-                System.out.println(byteAddress);
-                Log.i("BYTE_ARRAY", getPostDataString(postDataParams).getBytes().toString());
-
-                os.write(imeiBytes);
-                System.out.println(imeiBytes);
-                Log.i("IMEI_BYTE_ARRAY", getPostDataString(newPostDataParams).getBytes().toString());
-
-                String contactsDataFromServer = getPostDataString(contactsPostDataParams);
-                Log.i("CONTACTS_BYTE_ARRAY", contactsDataFromServer);
-                os.write(contactsDataFromServer.getBytes("UTF-8"));
-//                Log.i("CONTACTS_BYTE_ARRAY", getPostDataString(newPostDataParams));
-//                os.write(contactsBytes);
-
-
-                os.flush();
-                os.close();
+//                imeiBytes = getPostDataString(imeiPostDataParams).getBytes("UTF-8");
+//
+//                os.write(gpsBytes);
+//                //System.out.println(gpsBytes);
+//                Log.i("GPS_BYTE_ARRAY", getPostDataString(gpsPostDataParams).getBytes().toString());
+//
+//                os.write(imeiBytes);
+//                //System.out.println(imeiBytes);
+//                Log.i("IMEI_BYTE_ARRAY", getPostDataString(imeiPostDataParams).getBytes().toString());
+//
+//                String contactsDataFromServer = getPostDataString(contactsPostDataParams);
+//                os.write(contactsDataFromServer.getBytes("UTF-8"));
+//                Log.i("CONTACTS_BYTE_ARRAY", contactsDataFromServer);
+////                Log.i("CONTACTS_BYTE_ARRAY", getPostDataString(imeiPostDataParams));
+////                os.write(contactsBytes);
+//
+//
+//                os.flush();
+//                os.close();
 
                 int responseCode=conn.getResponseCode();
 
@@ -282,3 +291,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
+// async class util generic -> pass objects
+
+// service ->
+
+// Imei activity
+// geolocation activity
+// contacts activity
+// main activity -> only render
+

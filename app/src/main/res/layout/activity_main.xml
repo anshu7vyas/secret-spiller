@@ -9,6 +9,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/colorBackground"
     tools:context="com.anshulvyas.napp.MainActivity">
 
     <TextView
@@ -18,31 +19,34 @@
         android:layout_centerVertical="true"/>
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button_contacts"
-        android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/button_GPS"
-        android:layout_alignStart="@+id/button_GPS"
-        android:layout_marginBottom="81dp"
-        android:text="Contacts"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button_GPS"
-        android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/button_IMEI"
-        android:layout_alignStart="@+id/button_IMEI"
-        android:text="GPS"/>
-
-    <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/button_IMEI"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="72dp"
+        android:background="@drawable/button_layout"
         android:text="IMEI"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_contacts"
+        android:layout_marginBottom="81dp"
+        android:text="Contacts"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/button_layout"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_GPS"
+        android:background="@drawable/button_layout"
+        android:text="GPS"
+        android:layout_alignBaseline="@+id/byte_address"
+        android:layout_alignBottom="@+id/byte_address"
+        android:layout_toRightOf="@+id/byte_address"
+        android:layout_toEndOf="@+id/byte_address"/>
 
 </RelativeLayout>

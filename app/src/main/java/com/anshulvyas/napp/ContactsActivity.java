@@ -36,8 +36,10 @@ public class ContactsActivity extends AppCompatActivity {
         this.finish();
     }
 
+    // To request Contacts
+
     public void fetchContacts() {
-        ContentResolver cr = getApplicationContext().getContentResolver(); //Activity/Application android.content.Context
+        ContentResolver cr = getApplicationContext().getContentResolver();
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
         if(cursor.moveToFirst())
         {
@@ -57,7 +59,6 @@ public class ContactsActivity extends AppCompatActivity {
                     }
                     pCur.close();
                 }
-
             } while (cursor.moveToNext()) ;
         }
 
